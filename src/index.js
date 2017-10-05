@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
-import registerServiceWorker from './registerServiceWorker';
+import {unregister} from './registerServiceWorker'; //change this line.
 
 ReactDOM.render(<App />, document.getElementById('root'));
-registerServiceWorker();
+unregister(); //make sure to include this each time.
