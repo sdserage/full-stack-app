@@ -5,6 +5,9 @@ class App extends Component {
   render() {
     return (
       <div className="App">
+        <a href={process.env.REACT_APP_LOGIN}>
+          <button>Login</button>
+        </a>
       </div>
     );
   }
