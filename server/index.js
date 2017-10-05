@@ -29,7 +29,23 @@ passport.use(new Auth0Strategy({
   clientSecret: process.env.AUTH_CLIENT_SECRET,
   callbackURL: process.env.CALLBACK_URL
 }, function(accessToken, refreshToken, extraParams, profile, done){
-  done(null, profile);
+  const db = app.get('db');
+  db.find_user([profile.identities[0].user_id])
+    .then(user =>{
+      if(user[0]){
+        return done(null, user[0].id)
+      }else{
+        const user = profile._json;
+        db.create_user([
+          user.name,
+          user.email,
+          user.picture,
+          user.identities[0].user_id
+        ]).then(user => {
+          return done(null,user[0].id);
+        });
+      }
+    });
 }));
 
 app.get('/auth', passport.authenticate('auth0'));
@@ -38,12 +54,15 @@ app.get('/auth/callback', passport.authenticate('auth0', {
   failureRedirect: '/auth'
 }));
 
-passport.serializeUser(function(user,done){
-  done(null, user);
+passport.serializeUser(function(id,done){
+  done(null, id);
 });
 
-passport.deserializeUser(function(user,done){
-  done(null, user);
+passport.deserializeUser(function(id,done){
+  app.get('db').find_current_user([id])
+    .then(user=>{
+      return done(null, user[0]);
+    });
 });
 
 const PORT = 3001;
